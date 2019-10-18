@@ -1,6 +1,6 @@
 package com.github.alextremp.loadrules;
 
-import com.github.alextremp.loadrules.application.savesite.io.SiteDTO;
+import com.github.alextremp.additionalservices.application.dto.SiteDTO;
 import com.github.alextremp.loadrules.parser.Converter;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
