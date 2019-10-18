@@ -1,0 +1,329 @@
+{
+  "id": "uuid",
+  "version": "timestamp",
+  "additionalServices": [
+    {
+      "id": "finance_car",
+      "type": "marketplace",
+      "marketplace": {
+        "id": 1,
+        "code": "finance_car"
+      },
+      "loadRules": [
+        {
+          "operator": "equal",
+          "equal": {
+            "left": {
+              "source": "datalayer",
+              "datalayer": "ad_publisher_type_id"
+            },
+            "right": {
+              "source": "value",
+              "value": "2"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "tramicar",
+      "type": "appnexus",
+      "appnexus": {
+        "code": "tramicar"
+      },
+      "loadRules": [
+        {
+          "operator": "equal",
+          "equal": {
+            "left": {
+              "source": "datalayer",
+              "datalayer": "ad_publisher_type_id"
+            },
+            "right": {
+              "source": "value",
+              "value": "2"
+            }
+          }
+        },
+        {
+          "operator": "in",
+          "in": {
+            "data": {
+              "source": "datalayer",
+              "datalayer": "ads_name_page"
+            },
+            "collection": [
+              "cochesnet/ocasion/ficha",
+              "android.coches.net/detalle"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "axa",
+      "type": "appnexus",
+      "appnexus": {
+        "code": "axa"
+      },
+      "loadRules": [
+        {
+          "operator": "equal",
+          "equal": {
+            "left": {
+              "source": "datalayer",
+              "datalayer": "ad_publisher_type_id"
+            },
+            "right": {
+              "source": "value",
+              "value": "2"
+            }
+          }
+        },
+        {
+          "operator": "not",
+          "not": {
+            "operator": "equal",
+            "equal": {
+              "left": {
+                "source": "datalayer",
+                "datalayer": "ad_publisher_type_id"
+              },
+              "right": {
+                "source": "value",
+                "value": "2"
+              }
+            }
+          }
+        },
+        {
+          "operator": "in",
+          "in": {
+            "data": {
+              "source": "datalayer",
+              "datalayer": "ads_name_page"
+            },
+            "collection": [
+              "cochesnet/ocasion/ficha",
+              "android.coches.net/detalle"
+            ]
+          }
+        },
+        {
+          "operator": "lessThan",
+          "lessThan": {
+            "left": {
+              "source": "datalayer",
+              "datalayer": "km"
+            },
+            "right": {
+              "source": "value",
+              "value": "180001"
+            }
+          }
+        },
+        {
+          "operator": "lessThan",
+          "lessThan": {
+            "left": {
+              "source": "datalayer",
+              "value": "year"
+            },
+            "right": {
+              "source": "calc",
+              "calc": {
+                "operator": "sub",
+                "left": {
+                  "source": "platform",
+                  "platform": "year"
+                },
+                "right": {
+                  "source": "value",
+                  "value": "2"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "finance_re",
+      "type": "marketplace",
+      "marketplace": {
+        "id": 2,
+        "code": "finance_re"
+      },
+      "loadRules": [
+        {
+          "operator": "equal",
+          "equal": {
+            "left": {
+              "source": "datalayer",
+              "datalayer": "transaction_id"
+            },
+            "right": {
+              "source": "value",
+              "value": "1"
+            }
+          }
+        },
+        {
+          "operator": "in",
+          "in": {
+            "data": {
+              "source": "datalayer",
+              "datalayer": "property_id"
+            },
+            "collection": [
+              "1",
+              "2"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "insurance_re",
+      "type": "marketplace",
+      "marketplace": {
+        "id": 4,
+        "code": "insurance_re"
+      },
+      "loadRules": [
+        {
+          "operator": "in",
+          "in": {
+            "data": {
+              "source": "datalayer",
+              "datalayer": "transaction_id"
+            },
+            "collection": [
+              "1",
+              "3"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "reformas",
+      "type": "appnexus",
+      "appnexus": {
+        "code": "reformas"
+      },
+      "loadRules": [
+        {
+          "operator": "in",
+          "in": {
+            "data": {
+              "source": "datalayer",
+              "datalayer": "region_level2_id"
+            },
+            "collection": [
+              "28",
+              "8",
+              "46"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "prestalo",
+      "type": "appnexus",
+      "appnexus": {
+        "code": "prestalo"
+      },
+      "loadRules": [
+        {
+          "operator": "in",
+          "in": {
+            "data": {
+              "source": "datalayer",
+              "datalayer": "category_id"
+            },
+            "collection": [
+              "20",
+              "30",
+              "40",
+              "160"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "finance_re",
+      "type": "marketplace",
+      "marketplace": {
+        "id": 2,
+        "code": "finance_re"
+      },
+      "loadRules": [
+        {
+          "operator": "equal",
+          "equal": {
+            "left": {
+              "source": "datalayer",
+              "datalayer": "category_id"
+            },
+            "right": {
+              "source": "value",
+              "value": "20"
+            }
+          }
+        },
+        {
+          "operator": "equal",
+          "equal": {
+            "left": {
+              "source": "datalayer",
+              "datalayer": "transaction_id"
+            },
+            "right": {
+              "source": "value",
+              "value": "1"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "insurance_re",
+      "type": "marketplace",
+      "marketplace": {
+        "id": 4,
+        "code": "insurance_re"
+      },
+      "loadRules": [
+        {
+          "operator": "equal",
+          "equal": {
+            "left": {
+              "source": "datalayer",
+              "datalayer": "category_id"
+            },
+            "right": {
+              "source": "value",
+              "value": "20"
+            }
+          }
+        },
+        {
+          "operator": "in",
+          "in": {
+            "data": {
+              "source": "datalayer",
+              "datalayer": "transaction_id"
+            },
+            "collection": [
+              "1",
+              "3"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
