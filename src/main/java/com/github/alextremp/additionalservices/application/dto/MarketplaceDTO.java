@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MarketplaceDTO {
-  private Long id;
+  private Integer id;
   private String code;
 }
 

@@ -2,7 +2,7 @@ package com.github.alextremp.additionalservices.domain.additionalservice.dataext
 
 public class AddCalcDataExtractor extends CalcDataExtractor {
 
-  protected AddCalcDataExtractor(DataExtractor left, DataExtractor right) {
+  public AddCalcDataExtractor(DataExtractor left, DataExtractor right) {
     super(left, right);
   }
 

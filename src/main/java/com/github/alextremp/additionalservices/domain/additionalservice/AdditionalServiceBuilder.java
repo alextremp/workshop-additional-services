@@ -2,16 +2,18 @@ package com.github.alextremp.additionalservices.domain.additionalservice;
 
 import com.github.alextremp.additionalservices.domain.additionalservice.loadrule.LoadRule;
 
+import java.util.List;
+
 public abstract class AdditionalServiceBuilder {
 
   protected String id;
-  protected LoadRule loadRule;
+  protected List<LoadRule> loadRules;
 
-  public static AdditionalServiceBuilder marketplace() {
+  public static MarketplaceAdditionalServiceBuilder marketplace() {
     return new MarketplaceAdditionalServiceBuilder();
   }
 
-  public static AdditionalServiceBuilder appnexus() {
+  public static AppnexusAdditionalServiceBuilder appnexus() {
     return new AppnexusAdditionalServiceBuilder();
   }
 
@@ -22,22 +24,22 @@ public abstract class AdditionalServiceBuilder {
     return this;
   }
 
-  public AdditionalServiceBuilder withLoadRule(LoadRule loadRule) {
-    this.loadRule = loadRule;
+  public AdditionalServiceBuilder withLoadRules(List<LoadRule> loadRules) {
+    this.loadRules = loadRules;
     return this;
   }
 
   public static class MarketplaceAdditionalServiceBuilder extends AppnexusAdditionalServiceBuilder {
-    private String marketplaceId;
+    private Integer marketplaceId;
 
-    public MarketplaceAdditionalServiceBuilder withMarketplaceId(String marketplaceId) {
+    public MarketplaceAdditionalServiceBuilder withMarketplaceId(Integer marketplaceId) {
       this.marketplaceId = marketplaceId;
       return this;
     }
 
     @Override
     public AdditionalService build() {
-      return new MarketplaceAdditionalService(id, loadRule, marketplaceId, code);
+      return new MarketplaceAdditionalService(id, loadRules, marketplaceId, code);
     }
 
     public AppnexusAdditionalServiceBuilder and() {
@@ -53,13 +55,9 @@ public abstract class AdditionalServiceBuilder {
       return this;
     }
 
-    public AdditionalServiceBuilder and() {
-      return this;
-    }
-
     @Override
     public AdditionalService build() {
-      return new AppNexusAdditionalService(id, loadRule, code);
+      return new AppNexusAdditionalService(id, loadRules, code);
     }
   }
 

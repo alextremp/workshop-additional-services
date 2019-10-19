@@ -127,7 +127,7 @@
           "lessThan": {
             "left": {
               "source": "datalayer",
-              "value": "year"
+              "datalayer": "year"
             },
             "right": {
               "source": "calc",

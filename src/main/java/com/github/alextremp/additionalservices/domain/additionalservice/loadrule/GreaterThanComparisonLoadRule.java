@@ -3,7 +3,7 @@ package com.github.alextremp.additionalservices.domain.additionalservice.loadrul
 import com.github.alextremp.additionalservices.domain.additionalservice.dataextractor.DataExtractor;
 
 public class GreaterThanComparisonLoadRule extends ComparisonLoadRule {
-  protected GreaterThanComparisonLoadRule(DataExtractor leftDataExtractor, DataExtractor rightDataExtractor) {
+  public GreaterThanComparisonLoadRule(DataExtractor leftDataExtractor, DataExtractor rightDataExtractor) {
     super(leftDataExtractor, rightDataExtractor);
   }
 

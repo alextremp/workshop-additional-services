@@ -2,16 +2,18 @@ package com.github.alextremp.additionalservices.domain.additionalservice;
 
 import com.github.alextremp.additionalservices.domain.additionalservice.loadrule.LoadRule;
 
+import java.util.List;
+
 public class MarketplaceAdditionalService extends AppNexusAdditionalService {
 
-  private final String marketplaceId;
+  private final Integer marketplaceId;
 
-  protected MarketplaceAdditionalService(String id, LoadRule loadRule, String marketplaceId, String code) {
-    super(id, loadRule, code);
+  protected MarketplaceAdditionalService(String id, List<LoadRule> loadRules, Integer marketplaceId, String code) {
+    super(id, loadRules, code);
     this.marketplaceId = marketplaceId;
   }
 
-  public String marketplaceId() {
+  public Integer marketplaceId() {
     return marketplaceId;
   }
 }

@@ -4,7 +4,7 @@ import com.github.alextremp.additionalservices.domain.additionalservice.dataextr
 import org.apache.commons.lang3.StringUtils;
 
 public class EqualComparisonLoadRule extends ComparisonLoadRule {
-  protected EqualComparisonLoadRule(DataExtractor leftDataExtractor, DataExtractor rightDataExtractor) {
+  public EqualComparisonLoadRule(DataExtractor leftDataExtractor, DataExtractor rightDataExtractor) {
     super(leftDataExtractor, rightDataExtractor);
   }
 
