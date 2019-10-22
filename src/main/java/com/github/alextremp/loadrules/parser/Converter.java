@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.github.alextremp.additionalservices.application.dto.SiteDTO;
+import com.github.alextremp.additionalservices.domain.site.Site;
 
 import java.io.IOException;
 
@@ -24,6 +25,10 @@ public class Converter {
   }
 
   public String toJsonString(SiteDTO obj) throws JsonProcessingException {
+    return writer.writeValueAsString(obj);
+  }
+
+  public String toJsonString(Site obj) throws JsonProcessingException {
     return writer.writeValueAsString(obj);
   }
 

@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class LoadAdditionalServicesTest {
 
     //https://app.quicktype.io/
@@ -28,8 +30,14 @@ public class LoadAdditionalServicesTest {
         SiteDTO siteDTO = converter.fromJsonString(jsonString);
         System.out.println("SiteDTO: " + siteDTO);
 
-        Site site = siteMapper.from(siteDTO).block();
+        Site site = siteMapper.fromDTO(siteDTO).block();
         System.out.println("Site: " + site);
+
+        SiteDTO rebuiltDTO = siteMapper.fromDomain(site).block();
+        System.out.println("Rebuilt DTO: " + rebuiltDTO);
+        String rebuiltJsonString = converter.toJsonString(rebuiltDTO);
+        assertEquals(jsonString, rebuiltJsonString);
+
 
     }
 }

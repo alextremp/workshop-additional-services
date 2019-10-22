@@ -1,9 +1,11 @@
 package com.github.alextremp.additionalservices.application.mapper;
 
-import com.github.alextremp.additionalservices.application.dto.AdditionalServiceDTO;
-import com.github.alextremp.additionalservices.application.dto.LoadRuleDTO;
+import com.github.alextremp.additionalservices.application.dto.*;
 import com.github.alextremp.additionalservices.domain.additionalservice.AdditionalService;
 import com.github.alextremp.additionalservices.domain.additionalservice.AdditionalServiceBuilder;
+import com.github.alextremp.additionalservices.domain.additionalservice.AppNexusAdditionalService;
+import com.github.alextremp.additionalservices.domain.additionalservice.MarketplaceAdditionalService;
+import com.github.alextremp.additionalservices.domain.additionalservice.loadrule.LoadRule;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -12,12 +14,16 @@ import java.util.List;
 public class AdditionalServiceMapper {
 
     private final LoadRuleMapper loadRuleMapper;
+    private final FluentMap<SubAdditionalServiceMapper> subAdditionalServiceMappers;
 
     public AdditionalServiceMapper(LoadRuleMapper loadRuleMapper) {
         this.loadRuleMapper = loadRuleMapper;
+        this.subAdditionalServiceMappers = new FluentMap<SubAdditionalServiceMapper>()
+                .fluentPut(AppNexusAdditionalService.class.getName(), new AppNexusDomainMapper())
+                .fluentPut(MarketplaceAdditionalService.class.getName(), new MarketplaceDomainMapper());
     }
 
-    public Mono<AdditionalService> from(AdditionalServiceDTO dto) {
+    public Mono<AdditionalService> fromDTO(AdditionalServiceDTO dto) {
         return Mono.defer(() -> {
             switch (dto.getType()) {
                 case APPNEXUS:
@@ -34,6 +40,17 @@ public class AdditionalServiceMapper {
                     throw new IllegalArgumentException("Type not supported: " + dto.getType());
             }
         });
+    }
+
+    public Mono<AdditionalServiceDTO> fromDomain(AdditionalService additionalService) {
+        return Mono.fromCallable(() -> new AdditionalServiceDTO().setId(additionalService.id()))
+                .flatMap(dto -> subAdditionalServiceMappers.getNotNull(additionalService.getClass().getName()).map(additionalService, dto))
+                //.flatMap(dto -> mapLoadRules(additionalService.loadRule(), dto))
+                ;
+    }
+
+    private Mono<AdditionalServiceDTO> mapLoadRules(LoadRule loadRules, AdditionalServiceDTO dto) {
+        return null;
     }
 
     private Mono<AdditionalService> mapAppnexus(AdditionalServiceDTO additionalServiceDTO) {
@@ -61,4 +78,32 @@ public class AdditionalServiceMapper {
                 .collectList()
                 .map(builder::withLoadRules);
     }
+
+    private interface SubAdditionalServiceMapper {
+        Mono<AdditionalServiceDTO> map(AdditionalService additionalService, AdditionalServiceDTO dto);
+    }
+
+    private class AppNexusDomainMapper implements SubAdditionalServiceMapper {
+        @Override
+        public Mono<AdditionalServiceDTO> map(AdditionalService additionalService, AdditionalServiceDTO dto) {
+            return Mono.fromCallable(() -> (AppNexusAdditionalService) additionalService)
+                    .map(appNexusAdditionalService -> dto
+                            .setType(TypeDTO.APPNEXUS)
+                            .setAppnexus(new AppnexusDTO()
+                                    .setCode(appNexusAdditionalService.code())));
+        }
+    }
+
+    private class MarketplaceDomainMapper implements SubAdditionalServiceMapper {
+        @Override
+        public Mono<AdditionalServiceDTO> map(AdditionalService additionalService, AdditionalServiceDTO dto) {
+            return Mono.fromCallable(() -> (MarketplaceAdditionalService) additionalService)
+                    .map(marketplaceAdditionalService -> dto
+                            .setType(TypeDTO.MARKETPLACE)
+                            .setMarketplace(new MarketplaceDTO()
+                                    .setCode(marketplaceAdditionalService.code())
+                                    .setId(marketplaceAdditionalService.marketplaceId())));
+        }
+    }
+
 }

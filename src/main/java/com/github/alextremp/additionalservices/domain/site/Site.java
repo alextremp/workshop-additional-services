@@ -14,4 +14,16 @@ public class Site {
     this.version = version;
     this.additionalServices = additionalServices;
   }
+
+  public String getId() {
+    return id;
+  }
+
+  public String getVersion() {
+    return version;
+  }
+
+  public List<AdditionalService> getAdditionalServices() {
+    return additionalServices;
+  }
 }
