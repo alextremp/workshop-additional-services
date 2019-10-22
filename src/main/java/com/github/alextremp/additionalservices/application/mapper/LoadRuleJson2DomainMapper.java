@@ -1,8 +1,8 @@
 package com.github.alextremp.additionalservices.application.mapper;
 
-import com.github.alextremp.additionalservices.application.dto.InOperatorDTO;
-import com.github.alextremp.additionalservices.application.dto.LeftRightOperatorDTO;
-import com.github.alextremp.additionalservices.application.dto.LoadRuleDTO;
+import com.github.alextremp.additionalservices.application.dto.InOperatorJson;
+import com.github.alextremp.additionalservices.application.dto.LeftRightOperatorJson;
+import com.github.alextremp.additionalservices.application.dto.LoadRuleJson;
 import com.github.alextremp.additionalservices.domain.additionalservice.dataextractor.DataExtractor;
 import com.github.alextremp.additionalservices.domain.additionalservice.loadrule.*;
 import reactor.core.publisher.Flux;
@@ -12,15 +12,16 @@ import reactor.util.function.Tuple2;
 import java.util.List;
 import java.util.Objects;
 
-public class LoadRuleMapper {
+public class LoadRuleJson2DomainMapper implements Mapper<LoadRuleJson, LoadRule> {
 
     private final DataExtractorMapper dataExtractorMapper;
 
-    public LoadRuleMapper(DataExtractorMapper dataExtractorMapper) {
+    public LoadRuleJson2DomainMapper(DataExtractorMapper dataExtractorMapper) {
         this.dataExtractorMapper = dataExtractorMapper;
     }
 
-    public Mono<LoadRule> from(LoadRuleDTO dto) {
+    @Override
+    public Mono<LoadRule> map(LoadRuleJson dto) {
         return Mono.defer(() -> {
             switch (dto.getOperator()) {
                 case AND:
@@ -54,47 +55,47 @@ public class LoadRuleMapper {
         });
     }
 
-    private Mono<LoadRule> mapAnd(List<LoadRuleDTO> list) {
+    private Mono<LoadRule> mapAnd(List<LoadRuleJson> list) {
         return Flux.fromIterable(list)
-                .flatMap(this::from)
+                .flatMap(this::map)
                 .collectList()
                 .map(AndLoadRule::new);
     }
 
-    private Mono<LoadRule> mapOr(List<LoadRuleDTO> list) {
+    private Mono<LoadRule> mapOr(List<LoadRuleJson> list) {
         return Flux.fromIterable(list)
-                .flatMap(this::from)
+                .flatMap(this::map)
                 .collectList()
                 .map(OrLoadRule::new);
     }
 
-    private Mono<LoadRule> mapNot(LoadRuleDTO dto) {
-        return from(dto)
+    private Mono<LoadRule> mapNot(LoadRuleJson dto) {
+        return map(dto)
                 .map(NotLoadRule::new);
     }
 
-    private Mono<LoadRule> mapIn(InOperatorDTO dto) {
+    private Mono<LoadRule> mapIn(InOperatorJson dto) {
         return dataExtractorMapper.from(dto.getData())
                 .map(dataExtractor -> new InComparisonLoadRule(dataExtractor, dto.getCollection()));
     }
 
-    private Mono<LoadRule> mapEqual(LeftRightOperatorDTO dto) {
+    private Mono<LoadRule> mapEqual(LeftRightOperatorJson dto) {
         return mapLeftRightOperator(dto)
                 .map(lr -> new EqualComparisonLoadRule(lr.getT1(), lr.getT2()));
     }
 
-    private Mono<LoadRule> mapLessThan(LeftRightOperatorDTO dto) {
+    private Mono<LoadRule> mapLessThan(LeftRightOperatorJson dto) {
         return mapLeftRightOperator(dto)
                 .map(lr -> new LessThanComparisonLoadRule(lr.getT1(), lr.getT2()));
     }
 
-    private Mono<LoadRule> mapGreaterThan(LeftRightOperatorDTO dto) {
+    private Mono<LoadRule> mapGreaterThan(LeftRightOperatorJson dto) {
         return mapLeftRightOperator(dto)
                 .map(lr -> new GreaterThanComparisonLoadRule(lr.getT1(), lr.getT2()));
 
     }
 
-    private Mono<Tuple2<DataExtractor, DataExtractor>> mapLeftRightOperator(LeftRightOperatorDTO dto) {
+    private Mono<Tuple2<DataExtractor, DataExtractor>> mapLeftRightOperator(LeftRightOperatorJson dto) {
         return Mono.zip(
                 dataExtractorMapper.from(dto.getLeft()),
                 dataExtractorMapper.from(dto.getRight())

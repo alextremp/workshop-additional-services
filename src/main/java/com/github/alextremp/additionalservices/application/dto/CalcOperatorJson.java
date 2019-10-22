@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.io.IOException;
 
-public enum CalcOperatorDTO {
+public enum CalcOperatorJson {
   ADD, SUB, MUL, DIV;
 
   private static final String ADD_VALUE = "add";
@@ -29,7 +29,7 @@ public enum CalcOperatorDTO {
   }
 
   @JsonCreator
-  public static CalcOperatorDTO forValue(String value) throws IOException {
+  public static CalcOperatorJson forValue(String value) throws IOException {
     switch (value) {
       case ADD_VALUE:
         return ADD;

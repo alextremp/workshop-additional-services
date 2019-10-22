@@ -5,8 +5,7 @@ import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CalcDTO {
-  private CalcOperatorDTO operator;
-  private DataValueDTO left;
-  private DataValueDTO right;
+public class LeftRightOperatorJson {
+  private DataValueJson left;
+  private DataValueJson right;
 }

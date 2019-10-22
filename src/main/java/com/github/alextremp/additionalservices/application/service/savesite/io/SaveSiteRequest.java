@@ -1,10 +1,10 @@
 package com.github.alextremp.additionalservices.application.service.savesite.io;
 
-import com.github.alextremp.additionalservices.application.dto.SiteDTO;
+import com.github.alextremp.additionalservices.application.dto.SiteJson;
 import lombok.Data;
 
 @Data
 public class SaveSiteRequest {
 
-  private final SiteDTO site;
+  private final SiteJson site;
 }

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.io.IOException;
 
-public enum TypeDTO {
+public enum TypeJson {
   MARKETPLACE, APPNEXUS;
 
   private static final String MARKETPLACE_VALUE = "marketplace";
@@ -23,7 +23,7 @@ public enum TypeDTO {
   }
 
   @JsonCreator
-  public static TypeDTO forValue(String value) throws IOException {
+  public static TypeJson forValue(String value) throws IOException {
     switch (value) {
       case MARKETPLACE_VALUE:
         return MARKETPLACE;

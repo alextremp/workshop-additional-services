@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.github.alextremp.additionalservices.application.dto.SiteDTO;
+import com.github.alextremp.additionalservices.application.dto.SiteJson;
 import com.github.alextremp.additionalservices.domain.site.Site;
 
 import java.io.IOException;
@@ -16,15 +16,15 @@ public class Converter {
 
   public Converter() {
     ObjectMapper mapper = new ObjectMapper();
-    reader = mapper.readerFor(SiteDTO.class);
-    writer = mapper.writerFor(SiteDTO.class);
+    reader = mapper.readerFor(SiteJson.class);
+    writer = mapper.writerFor(SiteJson.class);
   }
 
-  public SiteDTO fromJsonString(String json) throws IOException {
+  public SiteJson fromJsonString(String json) throws IOException {
     return reader.readValue(json);
   }
 
-  public String toJsonString(SiteDTO obj) throws JsonProcessingException {
+  public String toJsonString(SiteJson obj) throws JsonProcessingException {
     return writer.writeValueAsString(obj);
   }
 

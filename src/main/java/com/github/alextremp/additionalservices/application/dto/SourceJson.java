@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.io.IOException;
 
-public enum SourceDTO {
+public enum SourceJson {
   VALUE, DATALAYER, CALC, PLATFORM;
 
   private static final String VALUE_VALUE = "value";
@@ -29,7 +29,7 @@ public enum SourceDTO {
   }
 
   @JsonCreator
-  public static SourceDTO forValue(String value) throws IOException {
+  public static SourceJson forValue(String value) throws IOException {
     switch (value) {
       case VALUE_VALUE:
         return VALUE;

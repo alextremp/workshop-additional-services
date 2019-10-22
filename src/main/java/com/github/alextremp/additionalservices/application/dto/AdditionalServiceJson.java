@@ -4,9 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.List;
+
 @Data
 @Accessors(chain = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AppnexusDTO {
-  private String code;
+public class AdditionalServiceJson {
+  private String id;
+  private TypeJson type;
+  private MarketplaceJson marketplace;
+  private AppnexusJson appnexus;
+  private List<LoadRuleJson> loadRules;
 }

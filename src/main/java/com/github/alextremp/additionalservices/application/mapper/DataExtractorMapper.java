@@ -1,7 +1,7 @@
 package com.github.alextremp.additionalservices.application.mapper;
 
-import com.github.alextremp.additionalservices.application.dto.CalcDTO;
-import com.github.alextremp.additionalservices.application.dto.DataValueDTO;
+import com.github.alextremp.additionalservices.application.dto.CalcJson;
+import com.github.alextremp.additionalservices.application.dto.DataValueJson;
 import com.github.alextremp.additionalservices.domain.additionalservice.dataextractor.*;
 import reactor.core.publisher.Mono;
 
@@ -9,7 +9,7 @@ import java.util.Objects;
 
 public class DataExtractorMapper {
 
-    public Mono<DataExtractor> from(DataValueDTO dto) {
+    public Mono<DataExtractor> from(DataValueJson dto) {
         return Mono.defer(() -> {
             Objects.requireNonNull(dto.getSource(), "Source is required");
             switch (dto.getSource()) {
@@ -51,16 +51,16 @@ public class DataExtractorMapper {
         });
     }
 
-    private Mono<DataExtractor> mapCalc(CalcDTO dto) {
+    private Mono<DataExtractor> mapCalc(CalcJson dto) {
         return Mono.fromCallable(() -> {
             Objects.requireNonNull(dto.getOperator(), "Operator is required");
             Objects.requireNonNull(dto.getLeft(), "Left is required");
             Objects.requireNonNull(dto.getRight(), "Right is required");
             return dto;
         })
-                .flatMap(calcDTO -> Mono.zip(
-                        from(calcDTO.getLeft()),
-                        from(calcDTO.getRight())
+                .flatMap(calcJson -> Mono.zip(
+                        from(calcJson.getLeft()),
+                        from(calcJson.getRight())
                 ))
                 .map(lr -> {
                     switch (dto.getOperator()) {

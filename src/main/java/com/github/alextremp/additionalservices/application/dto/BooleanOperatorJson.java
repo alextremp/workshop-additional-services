@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.io.IOException;
 
-public enum BooleanOperatorDTO {
+public enum BooleanOperatorJson {
   EQUAL, NOT, AND, OR, IN, LESS_THAN, GREATER_THAN;
 
   private static final String EQUAL_VALUE = "equal";
@@ -38,7 +38,7 @@ public enum BooleanOperatorDTO {
   }
 
   @JsonCreator
-  public static BooleanOperatorDTO forValue(String value) throws IOException {
+  public static BooleanOperatorJson forValue(String value) throws IOException {
     switch (value) {
       case EQUAL_VALUE:
         return EQUAL;
