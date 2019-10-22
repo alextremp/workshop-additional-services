@@ -1,5 +1,6 @@
 package com.github.alextremp.additionalservices.application.mapper;
 
+import com.github.alextremp.additionalservices.application.dto.AdditionalServiceJson;
 import com.github.alextremp.additionalservices.application.dto.SiteJson;
 import com.github.alextremp.additionalservices.domain.additionalservice.AdditionalService;
 import com.github.alextremp.additionalservices.domain.site.Site;
@@ -18,16 +19,22 @@ public class SiteDomain2JsonMapper implements Mapper<Site, SiteJson> {
 
     @Override
     public Mono<SiteJson> map(Site site) {
-        return Mono.fromCallable(() -> new SiteJson()
-                .setId(site.getId())
-                .setVersion(site.getVersion()))
-                .flatMap(siteDTO -> mapAdditionalServices(site.getAdditionalServices(), siteDTO));
+        return Mono.fromCallable(() -> new SiteJson())
+                .flatMap(siteJson -> map(site, siteJson));
     }
 
-    private Mono<SiteJson> mapAdditionalServices(List<AdditionalService> additionalServices, SiteJson siteJson) {
+    private Mono<SiteJson> map(Site site, SiteJson siteJson) {
+        return Mono.just(siteJson)
+                .map(dto -> dto.setId(site.getId()))
+                .map(dto -> dto.setVersion(site.getVersion()))
+                .map(dto -> site.getAdditionalServices())
+                .flatMap(this::mapAdditionalServices)
+                .map(siteJson::setAdditionalServices);
+    }
+
+    private Mono<List<AdditionalServiceJson>> mapAdditionalServices(List<AdditionalService> additionalServices) {
         return Flux.fromIterable(additionalServices)
                 .flatMap(additionalServiceMapper::map)
-                .collectList()
-                .map(siteJson::setAdditionalServices);
+                .collectList();
     }
 }

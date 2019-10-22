@@ -20,7 +20,7 @@ public class MapperTest {
         DataExtractorMapper dataExtractorMapper = new DataExtractorMapper();
         LoadRuleJson2DomainMapper loadRuleMapper = new LoadRuleJson2DomainMapper(dataExtractorMapper);
         AdditionalServiceJson2DomainMapper additionalServiceToDTOMapper = new AdditionalServiceJson2DomainMapper(loadRuleMapper);
-        AdditionalServiceDomain2JsonMapper additionalServiceToDomainMapper = new AdditionalServiceDomain2JsonMapper();
+        AdditionalServiceDomain2JsonMapper additionalServiceToDomainMapper = new AdditionalServiceDomain2JsonMapper(loadRuleDomain2JsonMapper);
         SiteJson2DomainMapper siteToDomainMapper = new SiteJson2DomainMapper(additionalServiceToDTOMapper);
         SiteDomain2JsonMapper siteToDTOMapper = new SiteDomain2JsonMapper(additionalServiceToDomainMapper);
         InputStream jsonStream = getClass().getResourceAsStream("/sample/sample-01.json");

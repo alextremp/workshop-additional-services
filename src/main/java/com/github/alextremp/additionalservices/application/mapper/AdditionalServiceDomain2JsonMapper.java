@@ -11,21 +11,30 @@ import reactor.core.publisher.Mono;
 
 public class AdditionalServiceDomain2JsonMapper implements Mapper<AdditionalService, AdditionalServiceJson> {
 
+    private final LoadRuleDomain2JsonMapper loadRuleDomain2JsonMapper;
 
-    private final FluentMap<String, SubAdditionalServiceMapper> subAdditionalServiceMappers;
+    private final FluentMap<String, SubAdditionalServiceMapper> subClassMappers;
 
-    public AdditionalServiceDomain2JsonMapper() {
-        this.subAdditionalServiceMappers = new FluentMap<String, SubAdditionalServiceMapper>()
+    public AdditionalServiceDomain2JsonMapper(LoadRuleDomain2JsonMapper loadRuleDomain2JsonMapper) {
+        this.loadRuleDomain2JsonMapper = loadRuleDomain2JsonMapper;
+        this.subClassMappers = new FluentMap<String, SubAdditionalServiceMapper>()
                 .fluentPut(AppNexusAdditionalService.class.getName(), new AppNexusDomainMapper())
                 .fluentPut(MarketplaceAdditionalService.class.getName(), new MarketplaceDomainMapper());
     }
 
     @Override
     public Mono<AdditionalServiceJson> map(AdditionalService additionalService) {
-        return Mono.fromCallable(() -> new AdditionalServiceJson().setId(additionalService.id()))
-                .flatMap(dto -> subAdditionalServiceMappers.getNotNull(additionalService.getClass().getName()).map(additionalService, dto))
-                //.flatMap(dto -> mapLoadRules(additionalService.loadRule(), dto))
-                ;
+        return Mono.fromCallable(() -> new AdditionalServiceJson())
+                .flatMap(dto -> map(additionalService, dto));
+    }
+
+    private Mono<AdditionalServiceJson> map(AdditionalService additionalService, AdditionalServiceJson additionalServiceJson) {
+        return Mono.just(additionalServiceJson)
+                .map(dto -> dto.setId(additionalService.id()))
+                .map(dto -> subClassMappers.getNotNull(additionalService.getClass().getName()))
+                .flatMap(subAdditionalServiceMapper -> subAdditionalServiceMapper.map(additionalService, additionalServiceJson))
+                .flatMap(dto -> loadRuleDomain2JsonMapper.map(additionalService.loadRule()))
+                .map(loadRuleJson -> additionalServiceJson.setLoadRules(loadRuleJson.getAnd()));
     }
 
     private interface SubAdditionalServiceMapper {
@@ -35,7 +44,7 @@ public class AdditionalServiceDomain2JsonMapper implements Mapper<AdditionalServ
     private class AppNexusDomainMapper implements SubAdditionalServiceMapper {
         @Override
         public Mono<AdditionalServiceJson> map(AdditionalService additionalService, AdditionalServiceJson dto) {
-            return Mono.fromCallable(() -> (AppNexusAdditionalService) additionalService)
+            return Mono.just((AppNexusAdditionalService) additionalService)
                     .map(appNexusAdditionalService -> dto
                             .setType(TypeJson.APPNEXUS)
                             .setAppnexus(new AppnexusJson()
@@ -46,7 +55,7 @@ public class AdditionalServiceDomain2JsonMapper implements Mapper<AdditionalServ
     private class MarketplaceDomainMapper implements SubAdditionalServiceMapper {
         @Override
         public Mono<AdditionalServiceJson> map(AdditionalService additionalService, AdditionalServiceJson dto) {
-            return Mono.fromCallable(() -> (MarketplaceAdditionalService) additionalService)
+            return Mono.just((MarketplaceAdditionalService) additionalService)
                     .map(marketplaceAdditionalService -> dto
                             .setType(TypeJson.MARKETPLACE)
                             .setMarketplace(new MarketplaceJson()

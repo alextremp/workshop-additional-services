@@ -18,4 +18,8 @@ public class OrLoadRule implements LoadRule {
   public boolean evaluate(Datalayer datalayer) {
     return loadRules.stream().anyMatch(loadRule -> loadRule.evaluate(datalayer));
   }
+
+  public List<LoadRule> loadRules() {
+    return loadRules;
+  }
 }

@@ -14,6 +14,10 @@ public class AndLoadRule implements LoadRule {
     this.loadRules = loadRules;
   }
 
+  public List<LoadRule> loadRules() {
+    return loadRules;
+  }
+
   @Override
   public boolean evaluate(Datalayer datalayer) {
     return loadRules.stream().allMatch(loadRule -> loadRule.evaluate(datalayer));

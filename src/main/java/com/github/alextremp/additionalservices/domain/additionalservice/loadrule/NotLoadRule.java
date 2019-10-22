@@ -12,6 +12,10 @@ public class NotLoadRule implements LoadRule {
     this.loadRule = loadRule;
   }
 
+  public LoadRule loadRule() {
+    return loadRule;
+  }
+
   @Override
   public boolean evaluate(Datalayer datalayer) {
     return !loadRule.evaluate(datalayer);
