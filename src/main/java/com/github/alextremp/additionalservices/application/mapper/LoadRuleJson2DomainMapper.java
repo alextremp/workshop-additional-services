@@ -76,22 +76,22 @@ public class LoadRuleJson2DomainMapper implements Mapper<LoadRuleJson, LoadRule>
 
     private Mono<LoadRule> mapIn(InOperatorJson dto) {
         return dataExtractorMapper.from(dto.getData())
-                .map(dataExtractor -> new InComparisonLoadRule(dataExtractor, dto.getCollection()));
+                .map(dataExtractor -> new InLoadRule(dataExtractor, dto.getCollection()));
     }
 
     private Mono<LoadRule> mapEqual(LeftRightOperatorJson dto) {
         return mapLeftRightOperator(dto)
-                .map(lr -> new EqualComparisonLoadRule(lr.getT1(), lr.getT2()));
+                .map(lr -> new EqualLoadRule(lr.getT1(), lr.getT2()));
     }
 
     private Mono<LoadRule> mapLessThan(LeftRightOperatorJson dto) {
         return mapLeftRightOperator(dto)
-                .map(lr -> new LessThanComparisonLoadRule(lr.getT1(), lr.getT2()));
+                .map(lr -> new LessThanLoadRule(lr.getT1(), lr.getT2()));
     }
 
     private Mono<LoadRule> mapGreaterThan(LeftRightOperatorJson dto) {
         return mapLeftRightOperator(dto)
-                .map(lr -> new GreaterThanComparisonLoadRule(lr.getT1(), lr.getT2()));
+                .map(lr -> new GreaterThanLoadRule(lr.getT1(), lr.getT2()));
 
     }
 

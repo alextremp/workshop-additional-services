@@ -7,12 +7,12 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 import java.util.Objects;
 
-public class InComparisonLoadRule implements LoadRule {
+public class InLoadRule implements LoadRule {
 
     private final DataExtractor dataExtractor;
     private final List<String> collection;
 
-    public InComparisonLoadRule(DataExtractor dataExtractor, List<String> collection) {
+    public InLoadRule(DataExtractor dataExtractor, List<String> collection) {
         Objects.requireNonNull(dataExtractor, "Data Extractor cannot be null");
         Objects.requireNonNull(collection, "Collection cannot be null");
         if (collection.isEmpty()) {
