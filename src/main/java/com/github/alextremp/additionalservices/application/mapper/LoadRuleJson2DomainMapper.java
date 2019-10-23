@@ -14,10 +14,10 @@ import java.util.Objects;
 
 public class LoadRuleJson2DomainMapper implements Mapper<LoadRuleJson, LoadRule> {
 
-    private final DataExtractorMapper dataExtractorMapper;
+    private final DataValueJson2DataExtractorMapper dataValueJson2DataExtractorMapper;
 
-    public LoadRuleJson2DomainMapper(DataExtractorMapper dataExtractorMapper) {
-        this.dataExtractorMapper = dataExtractorMapper;
+    public LoadRuleJson2DomainMapper(DataValueJson2DataExtractorMapper dataValueJson2DataExtractorMapper) {
+        this.dataValueJson2DataExtractorMapper = dataValueJson2DataExtractorMapper;
     }
 
     @Override
@@ -75,7 +75,7 @@ public class LoadRuleJson2DomainMapper implements Mapper<LoadRuleJson, LoadRule>
     }
 
     private Mono<LoadRule> mapIn(InOperatorJson dto) {
-        return dataExtractorMapper.from(dto.getData())
+        return dataValueJson2DataExtractorMapper.map(dto.getData())
                 .map(dataExtractor -> new InLoadRule(dataExtractor, dto.getCollection()));
     }
 
@@ -97,8 +97,8 @@ public class LoadRuleJson2DomainMapper implements Mapper<LoadRuleJson, LoadRule>
 
     private Mono<Tuple2<DataExtractor, DataExtractor>> mapLeftRightOperator(LeftRightOperatorJson dto) {
         return Mono.zip(
-                dataExtractorMapper.from(dto.getLeft()),
-                dataExtractorMapper.from(dto.getRight())
+                dataValueJson2DataExtractorMapper.map(dto.getLeft()),
+                dataValueJson2DataExtractorMapper.map(dto.getRight())
         );
     }
 }

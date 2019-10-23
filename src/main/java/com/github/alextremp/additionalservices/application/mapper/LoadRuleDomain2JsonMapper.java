@@ -11,9 +11,11 @@ import java.util.List;
 public class LoadRuleDomain2JsonMapper implements Mapper<LoadRule, LoadRuleJson> {
 
     private final FluentMap<String, SubLoadRuleMapper> subClassMappers;
+    private final DataExtractor2DataValueJsonMapper dataExtractor2DataValueJsonMapper;
 
-    public LoadRuleDomain2JsonMapper() {
+    public LoadRuleDomain2JsonMapper(DataExtractor2DataValueJsonMapper dataExtractor2DataValueJsonMapper) {
         final LoadRuleDomain2JsonMapper refThis = this;
+        this.dataExtractor2DataValueJsonMapper = dataExtractor2DataValueJsonMapper;
         this.subClassMappers = new FluentMap<String, SubLoadRuleMapper>() {{
             put(AndLoadRule.class.getName(), new AndLoadRuleMapper(refThis));
             put(OrLoadRule.class.getName(), new OrLoadRuleMapper(refThis));
