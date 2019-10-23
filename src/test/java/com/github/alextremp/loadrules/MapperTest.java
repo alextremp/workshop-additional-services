@@ -18,6 +18,7 @@ public class MapperTest {
     @Test
     public void from() throws Exception {
         DataValueJson2DataExtractorMapper dataValueJson2DataExtractorMapper = new DataValueJson2DataExtractorMapper();
+        DataExtractor2DataValueJsonMapper dataExtractor2DataValueJsonMapper = new DataExtractor2DataValueJsonMapper();
         LoadRuleJson2DomainMapper loadRuleMapper = new LoadRuleJson2DomainMapper(dataValueJson2DataExtractorMapper);
         LoadRuleDomain2JsonMapper loadRuleDomain2JsonMapper = new LoadRuleDomain2JsonMapper(dataExtractor2DataValueJsonMapper);
         AdditionalServiceJson2DomainMapper additionalServiceToDTOMapper = new AdditionalServiceJson2DomainMapper(loadRuleMapper);

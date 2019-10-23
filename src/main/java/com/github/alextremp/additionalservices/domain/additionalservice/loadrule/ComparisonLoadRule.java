@@ -22,4 +22,12 @@ public abstract class ComparisonLoadRule implements LoadRule {
   }
 
   protected abstract boolean evaluate(String left, String right);
+
+  public DataExtractor leftDataExtractor() {
+    return leftDataExtractor;
+  }
+
+  public DataExtractor rightDataExtractor() {
+    return rightDataExtractor;
+  }
 }
