@@ -2,13 +2,13 @@ package com.github.alextremp.additionalservices.domain.additionalservice.loadrul
 
 import com.github.alextremp.additionalservices.domain.additionalservice.datalayer.Datalayer;
 
+import java.util.Objects;
+
 public class NotLoadRule implements LoadRule {
   private final LoadRule loadRule;
 
   public NotLoadRule(LoadRule loadRule) {
-    if (loadRule == null) {
-      throw new IllegalArgumentException("NOT load rule cannot be null");
-    }
+    Objects.requireNonNull(loadRule, "NOT load rule cannot be null");
     this.loadRule = loadRule;
   }
 

@@ -2,10 +2,13 @@ package com.github.alextremp.additionalservices.domain.additionalservice.dataext
 
 import com.github.alextremp.additionalservices.domain.additionalservice.datalayer.Datalayer;
 
+import java.util.Objects;
+
 public class DatalayerDataExtractor implements DataExtractor {
   private final String key;
 
   public DatalayerDataExtractor(String key) {
+    Objects.requireNonNull(key, "'key' cannot be null");
     this.key = key;
   }
 

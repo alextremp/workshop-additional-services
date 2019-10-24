@@ -12,31 +12,24 @@ public class DataExtractor2DataValueJsonMapper implements Mapper<DataExtractor, 
   private final FluentMap<Class<? extends DataExtractor>, SubDataExtractorMapper> subDataExtractorMappers;
 
   public DataExtractor2DataValueJsonMapper() {
-    final DataExtractor2DataValueJsonMapper refThis = this;
-    this.subDataExtractorMappers = new FluentMap<Class<? extends DataExtractor>, SubDataExtractorMapper>() {{
-      put(AddDataExtractor.class, new CalcDataExtractorMapper(refThis, CalcOperatorJson.ADD));
-      put(SubstractDataExtractor.class, new CalcDataExtractorMapper(refThis, CalcOperatorJson.SUB));
-      put(MultiplyDataExtractor.class, new CalcDataExtractorMapper(refThis, CalcOperatorJson.MUL));
-      put(DivideDataExtractor.class, new CalcDataExtractorMapper(refThis, CalcOperatorJson.DIV));
-      put(FixedValueDataExtractor.class, new FixedValueDataExtractorMapper());
-      put(DatalayerDataExtractor.class, new DatalayerValueDataExtractorMapper());
-      put(PlatformYearDataExtractor.class, new PlatformYearDataExtractorMapper());
-    }};
+    this.subDataExtractorMappers = new FluentMap<Class<? extends DataExtractor>, SubDataExtractorMapper>()
+        .fluentPut(AddDataExtractor.class, new CalcDataExtractorMapper(this, CalcOperatorJson.ADD))
+        .fluentPut(SubstractDataExtractor.class, new CalcDataExtractorMapper(this, CalcOperatorJson.SUB))
+        .fluentPut(MultiplyDataExtractor.class, new CalcDataExtractorMapper(this, CalcOperatorJson.MUL))
+        .fluentPut(DivideDataExtractor.class, new CalcDataExtractorMapper(this, CalcOperatorJson.DIV))
+        .fluentPut(FixedValueDataExtractor.class, new FixedValueDataExtractorMapper())
+        .fluentPut(DatalayerDataExtractor.class, new DatalayerValueDataExtractorMapper())
+        .fluentPut(PlatformYearDataExtractor.class, new PlatformYearDataExtractorMapper());
   }
 
   @Override
   public Mono<DataValueJson> map(DataExtractor dataExtractor) {
-    return Mono.fromCallable(() -> new DataValueJson())
-        .flatMap(dataValueJson -> map(dataExtractor, dataValueJson));
-  }
-
-  private Mono<DataValueJson> map(DataExtractor dataExtractor, DataValueJson dataValueJson) {
     return Mono.fromCallable(() -> subDataExtractorMappers.getNotNull(dataExtractor.getClass()))
-        .flatMap(mapper -> mapper.map(dataExtractor, dataValueJson));
+        .flatMap(mapper -> mapper.map(dataExtractor));
   }
 
   private interface SubDataExtractorMapper {
-    Mono<DataValueJson> map(DataExtractor dataExtractor, DataValueJson dto);
+    Mono<DataValueJson> map(DataExtractor dataExtractor);
   }
 
   private class CalcDataExtractorMapper implements SubDataExtractorMapper {
@@ -50,45 +43,50 @@ public class DataExtractor2DataValueJsonMapper implements Mapper<DataExtractor, 
     }
 
     @Override
-    public Mono<DataValueJson> map(DataExtractor dataExtractor, DataValueJson dataValueJson) {
+    public Mono<DataValueJson> map(DataExtractor dataExtractor) {
       return Mono.just((CalcDataExtractor) dataExtractor)
-          .flatMap(this::toCalcJson)
-          .map(dataValueJson::setCalc)
-          .map(dto -> dto.setSource(SourceJson.CALC));
-    }
-
-    private Mono<CalcJson> toCalcJson(CalcDataExtractor calcDataExtractor) {
-      return Mono.zip(dataExtractor2DataValueJsonMapper.map(calcDataExtractor.left()), dataExtractor2DataValueJsonMapper.map(calcDataExtractor.right()))
-          .map(tuple -> new CalcJson(operator, tuple.getT1(), tuple.getT2()));
+          .flatMap(calcDataExtractor -> Mono.zip(
+              dataExtractor2DataValueJsonMapper.map(calcDataExtractor.left()),
+              dataExtractor2DataValueJsonMapper.map(calcDataExtractor.right()))
+          )
+          .map(tuple -> new CalcJson(operator, tuple.getT1(), tuple.getT2()))
+          .map(calcJson -> new DataValueJson()
+              .setSource(SourceJson.CALC)
+              .setCalc(calcJson)
+          );
     }
   }
 
   private class FixedValueDataExtractorMapper implements SubDataExtractorMapper {
     @Override
-    public Mono<DataValueJson> map(DataExtractor dataExtractor, DataValueJson dataValueJson) {
+    public Mono<DataValueJson> map(DataExtractor dataExtractor) {
       return Mono.just((FixedValueDataExtractor) dataExtractor)
-          .map(fixedValueDataExtractor -> fixedValueDataExtractor.value())
-          .map(dataValueJson::setValue)
-          .map(dto -> dataValueJson.setSource(SourceJson.VALUE));
+          .map(fixedValueDataExtractor -> new DataValueJson()
+              .setSource(SourceJson.VALUE)
+              .setValue(fixedValueDataExtractor.value())
+          );
     }
   }
 
   private class DatalayerValueDataExtractorMapper implements SubDataExtractorMapper {
     @Override
-    public Mono<DataValueJson> map(DataExtractor dataExtractor, DataValueJson dataValueJson) {
+    public Mono<DataValueJson> map(DataExtractor dataExtractor) {
       return Mono.just((DatalayerDataExtractor) dataExtractor)
-          .map(datalayerDataExtractor -> datalayerDataExtractor.key())
-          .map(dataValueJson::setDatalayer)
-          .map(dto -> dataValueJson.setSource(SourceJson.DATALAYER));
+          .map(datalayerDataExtractor -> new DataValueJson()
+              .setSource(SourceJson.DATALAYER)
+              .setDatalayer(datalayerDataExtractor.key())
+          );
     }
   }
 
   private class PlatformYearDataExtractorMapper implements SubDataExtractorMapper {
     @Override
-    public Mono<DataValueJson> map(DataExtractor dataExtractor, DataValueJson dataValueJson) {
+    public Mono<DataValueJson> map(DataExtractor dataExtractor) {
       return Mono.just((PlatformYearDataExtractor) dataExtractor)
-          .map(platformYearDataExtractor -> dataValueJson.setPlatform("year"))
-          .map(dto -> dataValueJson.setSource(SourceJson.PLATFORM));
+          .map(platformYearDataExtractor -> new DataValueJson()
+              .setSource(SourceJson.PLATFORM)
+              .setPlatform(PlatformYearDataExtractor.PLATFORM_KEY)
+          );
     }
   }
 }

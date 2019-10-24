@@ -4,5 +4,5 @@ import reactor.core.publisher.Mono;
 
 public interface Mapper<I, O> {
 
-    Mono<O> map(I input);
+  Mono<O> map(I input);
 }

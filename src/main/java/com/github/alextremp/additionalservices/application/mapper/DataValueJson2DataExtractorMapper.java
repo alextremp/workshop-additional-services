@@ -1,81 +1,143 @@
 package com.github.alextremp.additionalservices.application.mapper;
 
 import com.github.alextremp.additionalservices.application.dto.CalcJson;
+import com.github.alextremp.additionalservices.application.dto.CalcOperatorJson;
 import com.github.alextremp.additionalservices.application.dto.DataValueJson;
+import com.github.alextremp.additionalservices.application.dto.SourceJson;
 import com.github.alextremp.additionalservices.domain.additionalservice.dataextractor.*;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 
+import static com.github.alextremp.additionalservices.application.dto.CalcOperatorJson.*;
+import static com.github.alextremp.additionalservices.application.dto.SourceJson.*;
+
 public class DataValueJson2DataExtractorMapper implements Mapper<DataValueJson, DataExtractor> {
 
+  private final FluentMap<SourceJson, SourceMapper> sourceMappers;
+  private final FluentMap<String, PlatformDataExtractorFactory> platformDataExtractorFactories;
+  private final FluentMap<CalcOperatorJson, CalcDataExtractorFactory> calcDataExtractorFactories;
+
+  public DataValueJson2DataExtractorMapper() {
+    this.sourceMappers = new FluentMap<SourceJson, SourceMapper>()
+        .fluentPut(DATALAYER, new DatalayerMapper())
+        .fluentPut(VALUE, new ValueMapper())
+        .fluentPut(PLATFORM, new PlatformMapper())
+        .fluentPut(CALC, new CalcMapper(this));
+
+    this.platformDataExtractorFactories = new FluentMap<String, PlatformDataExtractorFactory>()
+        .fluentPut(PlatformYearDataExtractor.PLATFORM_KEY, new PlatformYearFactory());
+
+    this.calcDataExtractorFactories = new FluentMap<CalcOperatorJson, CalcDataExtractorFactory>()
+        .fluentPut(ADD, new AddCalcDataExtractorFactory())
+        .fluentPut(SUB, new SubstractCalcDataExtractorFactory())
+        .fluentPut(MUL, new MultiplyCalcDataExtractorFactory())
+        .fluentPut(DIV, new DivideCalcDataExtractorFactory());
+  }
+
   @Override
-  public Mono<DataExtractor> map(DataValueJson dto) {
-    return Mono.defer(() -> {
-      Objects.requireNonNull(dto.getSource(), "Source is required");
-      switch (dto.getSource()) {
-        case DATALAYER:
-          Objects.requireNonNull(dto.getDatalayer(), "'datalayer' node is required with 'datalayer' operator");
-          return mapDatalayer(dto.getDatalayer());
-        case VALUE:
-          Objects.requireNonNull(dto.getValue(), "'value' node is required with 'value' operator");
-          return mapValue(dto.getValue());
-        case PLATFORM:
-          Objects.requireNonNull(dto.getPlatform(), "'platform' node is required with 'platform' operator");
-          return mapPlatform(dto.getPlatform());
-        case CALC:
-          Objects.requireNonNull(dto.getCalc(), "'calc' node is required with 'calc' operator");
-          return mapCalc(dto.getCalc());
-        default:
-          throw new IllegalArgumentException("Source not supported: " + dto.getSource());
-      }
-    });
+  public Mono<DataExtractor> map(DataValueJson dataValueJson) {
+    return Mono.fromCallable(() -> sourceMappers.getNotNull(dataValueJson.getSource()))
+        .flatMap(sourceMapper -> sourceMapper.map(dataValueJson));
   }
 
-  private Mono<DataExtractor> mapDatalayer(String datalayer) {
-    return Mono.fromCallable(() -> new DatalayerDataExtractor(datalayer));
+  private interface SourceMapper extends Mapper<DataValueJson, DataExtractor> {
   }
 
-  private Mono<DataExtractor> mapValue(String value) {
-    return Mono.fromCallable(() -> new FixedValueDataExtractor(value));
+  private interface PlatformDataExtractorFactory {
+    PlatformDataExtractor create();
   }
 
-  private Mono<DataExtractor> mapPlatform(String platform) {
-    return Mono.fromCallable(() -> {
-      switch (platform) {
-        case "year":
-          return new PlatformYearDataExtractor();
-        default:
-          throw new IllegalArgumentException("platform not accepted: " + platform);
-
-      }
-    });
+  private interface CalcDataExtractorFactory {
+    CalcDataExtractor create(DataExtractor left, DataExtractor right);
   }
 
-  private Mono<DataExtractor> mapCalc(CalcJson dto) {
-    return Mono.fromCallable(() -> {
-      Objects.requireNonNull(dto.getOperator(), "Operator is required");
-      Objects.requireNonNull(dto.getLeft(), "Left is required");
-      Objects.requireNonNull(dto.getRight(), "Right is required");
-      return dto;
-    })
-        .flatMap(calcJson -> Mono.zip(
-            map(calcJson.getLeft()),
-            map(calcJson.getRight())
-        ))
-        .map(lr -> {
-          switch (dto.getOperator()) {
-            case ADD:
-              return new AddDataExtractor(lr.getT1(), lr.getT2());
-            case SUB:
-              return new SubstractDataExtractor(lr.getT1(), lr.getT2());
-            case MUL:
-              return new MultiplyDataExtractor(lr.getT1(), lr.getT2());
-            case DIV:
-              return new DivideDataExtractor(lr.getT1(), lr.getT2());
-            default:
-              throw new IllegalArgumentException("Operator not accepted: " + dto.getOperator());
-          }
-        });
+
+  private class DatalayerMapper implements SourceMapper {
+    @Override
+    public Mono<DataExtractor> map(DataValueJson dataValueJson) {
+      return Mono.fromCallable(() -> dataValueJson.getDatalayer())
+          .map(DatalayerDataExtractor::new);
+    }
+  }
+
+  private class ValueMapper implements SourceMapper {
+    @Override
+    public Mono<DataExtractor> map(DataValueJson dataValueJson) {
+      return Mono.fromCallable(() -> dataValueJson.getValue())
+          .map(FixedValueDataExtractor::new);
+    }
+  }
+
+  private class PlatformMapper implements SourceMapper {
+    @Override
+    public Mono<DataExtractor> map(DataValueJson dataValueJson) {
+      return Mono.fromCallable(() -> platformDataExtractorFactories.getNotNull(dataValueJson.getPlatform()))
+          .map(PlatformDataExtractorFactory::create);
+    }
+  }
+
+  private class CalcMapper implements SourceMapper {
+    private final DataValueJson2DataExtractorMapper dataValueJson2DataExtractorMapper;
+
+    private CalcMapper(DataValueJson2DataExtractorMapper dataValueJson2DataExtractorMapper) {
+      this.dataValueJson2DataExtractorMapper = dataValueJson2DataExtractorMapper;
+    }
+
+    @Override
+    public Mono<DataExtractor> map(DataValueJson dataValueJson) {
+      return Mono.fromCallable(() -> validatedCalc(dataValueJson))
+          .flatMap(calcJson -> Mono.zip(
+              Mono.just(calcJson.getOperator()),
+              dataValueJson2DataExtractorMapper.map(calcJson.getLeft()),
+              dataValueJson2DataExtractorMapper.map(calcJson.getRight())
+          ))
+          .map(tuple -> calcDataExtractorFactories.getNotNull(tuple.getT1())
+              .create(tuple.getT2(), tuple.getT3())
+          );
+    }
+
+    private CalcJson validatedCalc(DataValueJson dataValueJson) {
+      Objects.requireNonNull(dataValueJson.getCalc(), "Calc cannot be null");
+      Objects.requireNonNull(dataValueJson.getCalc().getOperator(), "Operator is required");
+      Objects.requireNonNull(dataValueJson.getCalc().getLeft(), "Left is required");
+      Objects.requireNonNull(dataValueJson.getCalc().getRight(), "Right is required");
+      return dataValueJson.getCalc();
+    }
+  }
+
+  private class PlatformYearFactory implements PlatformDataExtractorFactory {
+    @Override
+    public PlatformDataExtractor create() {
+      return new PlatformYearDataExtractor();
+    }
+  }
+
+  private class AddCalcDataExtractorFactory implements CalcDataExtractorFactory {
+    @Override
+    public CalcDataExtractor create(DataExtractor left, DataExtractor right) {
+      return new AddDataExtractor(left, right);
+    }
+  }
+
+  private class SubstractCalcDataExtractorFactory implements CalcDataExtractorFactory {
+    @Override
+    public CalcDataExtractor create(DataExtractor left, DataExtractor right) {
+      return new SubstractDataExtractor(left, right);
+    }
+  }
+
+  private class MultiplyCalcDataExtractorFactory implements CalcDataExtractorFactory {
+    @Override
+    public CalcDataExtractor create(DataExtractor left, DataExtractor right) {
+      return new MultiplyDataExtractor(left, right);
+    }
+  }
+
+  private class DivideCalcDataExtractorFactory implements CalcDataExtractorFactory {
+    @Override
+    public CalcDataExtractor create(DataExtractor left, DataExtractor right) {
+      return new DivideDataExtractor(left, right);
+    }
   }
 }

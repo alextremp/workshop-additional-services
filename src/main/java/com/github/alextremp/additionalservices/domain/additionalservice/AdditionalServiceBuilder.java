@@ -39,7 +39,7 @@ public abstract class AdditionalServiceBuilder {
 
     @Override
     public AdditionalService build() {
-      return new MarketplaceAdditionalService(id, loadRules, marketplaceId, code);
+      return new MarketplaceAdditionalService(id, loadRules, code, marketplaceId);
     }
 
     public AppnexusAdditionalServiceBuilder and() {

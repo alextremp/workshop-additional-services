@@ -10,8 +10,8 @@ public abstract class ComparisonLoadRule implements LoadRule {
   private final DataExtractor rightDataExtractor;
 
   protected ComparisonLoadRule(DataExtractor leftDataExtractor, DataExtractor rightDataExtractor) {
-    Objects.requireNonNull(leftDataExtractor, "Left data extractor cannot be null");
-    Objects.requireNonNull(rightDataExtractor, "Right data extractor cannot be null");
+    Objects.requireNonNull(leftDataExtractor, "Comparison Left data extractor cannot be null");
+    Objects.requireNonNull(rightDataExtractor, "Comparison Right data extractor cannot be null");
     this.leftDataExtractor = leftDataExtractor;
     this.rightDataExtractor = rightDataExtractor;
   }

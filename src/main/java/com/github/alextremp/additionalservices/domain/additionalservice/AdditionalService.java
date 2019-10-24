@@ -10,7 +10,7 @@ import java.util.Objects;
 public abstract class AdditionalService {
 
   private final String id;
-  private final LoadRule loadRule;
+  private final AndLoadRule loadRule;
 
   protected AdditionalService(String id, List<LoadRule> loadRules) {
     Objects.requireNonNull(id, "id cannot be null");
@@ -34,7 +34,7 @@ public abstract class AdditionalService {
     return id;
   }
 
-  public LoadRule loadRule() {
+  public AndLoadRule loadRule() {
     return loadRule;
   }
 }
