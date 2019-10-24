@@ -66,13 +66,13 @@ public class DataValueJson2DataExtractorMapper implements Mapper<DataValueJson, 
         .map(lr -> {
           switch (dto.getOperator()) {
             case ADD:
-              return new AddCalcDataExtractor(lr.getT1(), lr.getT2());
+              return new AddDataExtractor(lr.getT1(), lr.getT2());
             case SUB:
-              return new SubstractCalcDataExtractor(lr.getT1(), lr.getT2());
+              return new SubstractDataExtractor(lr.getT1(), lr.getT2());
             case MUL:
-              return new MultiplyCalcDataExtractor(lr.getT1(), lr.getT2());
+              return new MultiplyDataExtractor(lr.getT1(), lr.getT2());
             case DIV:
-              return new DivideCalcDataExtractor(lr.getT1(), lr.getT2());
+              return new DivideDataExtractor(lr.getT1(), lr.getT2());
             default:
               throw new IllegalArgumentException("Operator not accepted: " + dto.getOperator());
           }

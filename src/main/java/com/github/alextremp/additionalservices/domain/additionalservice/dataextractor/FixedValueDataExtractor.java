@@ -13,4 +13,8 @@ public class FixedValueDataExtractor implements DataExtractor {
   public String value(Datalayer datalayer) {
     return value;
   }
+
+  public String value() {
+    return value;
+  }
 }

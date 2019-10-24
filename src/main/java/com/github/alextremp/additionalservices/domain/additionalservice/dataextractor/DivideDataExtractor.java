@@ -1,8 +1,8 @@
 package com.github.alextremp.additionalservices.domain.additionalservice.dataextractor;
 
-public class DivideCalcDataExtractor extends CalcDataExtractor {
+public class DivideDataExtractor extends CalcDataExtractor {
 
-  public DivideCalcDataExtractor(DataExtractor left, DataExtractor right) {
+  public DivideDataExtractor(DataExtractor left, DataExtractor right) {
     super(left, right);
   }
 

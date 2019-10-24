@@ -13,4 +13,8 @@ public class DatalayerDataExtractor implements DataExtractor {
   public String value(Datalayer datalayer) {
     return datalayer.value(key);
   }
+
+  public String key() {
+    return key;
+  }
 }
