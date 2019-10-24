@@ -27,4 +27,12 @@ public class InLoadRule implements LoadRule {
         String value = dataExtractor.value(datalayer);
         return collection.stream().anyMatch(data -> StringUtils.equals(value, data));
     }
+
+    public DataExtractor dataExtractor() {
+        return dataExtractor;
+    }
+
+    public List<String> collection() {
+        return collection;
+    }
 }

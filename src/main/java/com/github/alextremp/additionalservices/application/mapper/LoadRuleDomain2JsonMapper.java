@@ -1,31 +1,27 @@
 package com.github.alextremp.additionalservices.application.mapper;
 
 import com.github.alextremp.additionalservices.application.dto.BooleanOperatorJson;
+import com.github.alextremp.additionalservices.application.dto.InOperatorJson;
 import com.github.alextremp.additionalservices.application.dto.LeftRightOperatorJson;
 import com.github.alextremp.additionalservices.application.dto.LoadRuleJson;
 import com.github.alextremp.additionalservices.domain.additionalservice.loadrule.*;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 public class LoadRuleDomain2JsonMapper implements Mapper<LoadRule, LoadRuleJson> {
 
-  private final FluentMap<String, SubLoadRuleMapper> subClassMappers;
+  private final FluentMap<Class<? extends LoadRule>, SubLoadRuleMapper> subClassMappers;
   private final DataExtractor2DataValueJsonMapper dataExtractor2DataValueJsonMapper;
 
   public LoadRuleDomain2JsonMapper(DataExtractor2DataValueJsonMapper dataExtractor2DataValueJsonMapper) {
-    final LoadRuleDomain2JsonMapper refThis = this;
     this.dataExtractor2DataValueJsonMapper = dataExtractor2DataValueJsonMapper;
-    this.subClassMappers = new FluentMap<String, SubLoadRuleMapper>() {{
-      put(AndLoadRule.class.getName(), new ListLoadRuleMapper(refThis, BooleanOperatorJson.AND));
-      put(OrLoadRule.class.getName(), new ListLoadRuleMapper(refThis, BooleanOperatorJson.OR));
-      put(EqualLoadRule.class.getName(), new ComparisonLoadRuleMapper(BooleanOperatorJson.EQUAL));
-      put(LessThanLoadRule.class.getName(), new ComparisonLoadRuleMapper(BooleanOperatorJson.LESS_THAN));
-      put(GreaterThanLoadRule.class.getName(), new ComparisonLoadRuleMapper(BooleanOperatorJson.GREATER_THAN));
-      put(NotLoadRule.class.getName(), new NotLoadRuleMapper(refThis));
-      put(InLoadRule.class.getName(), new InLoadRuleMapper(refThis));
-    }};
+    this.subClassMappers = new FluentMap<Class<? extends LoadRule>, SubLoadRuleMapper>()
+        .fluentPut(AndLoadRule.class, new ListLoadRuleMapper(this, BooleanOperatorJson.AND))
+        .fluentPut(OrLoadRule.class, new ListLoadRuleMapper(this, BooleanOperatorJson.OR))
+        .fluentPut(EqualLoadRule.class, new ComparisonLoadRuleMapper(BooleanOperatorJson.EQUAL))
+        .fluentPut(LessThanLoadRule.class, new ComparisonLoadRuleMapper(BooleanOperatorJson.LESS_THAN))
+        .fluentPut(GreaterThanLoadRule.class, new ComparisonLoadRuleMapper(BooleanOperatorJson.GREATER_THAN))
+        .fluentPut(NotLoadRule.class, new NotLoadRuleMapper(this))
+        .fluentPut(InLoadRule.class, new InLoadRuleMapper(this));
   }
 
   @Override
@@ -35,8 +31,7 @@ public class LoadRuleDomain2JsonMapper implements Mapper<LoadRule, LoadRuleJson>
   }
 
   private Mono<LoadRuleJson> map(LoadRule loadRule, LoadRuleJson loadRuleJson) {
-    return Mono.just(loadRuleJson)
-        .map(dto -> subClassMappers.getNotNull(loadRule.getClass().getName()))
+    return Mono.fromCallable(() -> subClassMappers.getNotNull(loadRule.getClass()))
         .flatMap(subLoadRuleMapper -> subLoadRuleMapper.map(loadRule, loadRuleJson));
   }
 
@@ -56,29 +51,21 @@ public class LoadRuleDomain2JsonMapper implements Mapper<LoadRule, LoadRuleJson>
 
     @Override
     public Mono<LoadRuleJson> map(LoadRule loadRule, LoadRuleJson loadRuleJson) {
-      return Mono.just((ListLoadRule) loadRule)
-          .map(listLoadRule -> listLoadRule.loadRules())
-          .flatMap(this::toLoadRuleJsonList)
-          .doOnNext(list -> {
+      return Mono.fromCallable(() -> (ListLoadRule) loadRule)
+          .flatMapIterable(listLoadRule -> listLoadRule.loadRules())
+          .flatMap(loadRuleDomain2JsonMapper::map)
+          .collectList()
+          .map(list -> {
             switch (operator) {
               case AND:
-                loadRuleJson.setAnd(list);
-                break;
+                return loadRuleJson.setAnd(list);
               case OR:
-                loadRuleJson.setOr(list);
-                break;
+                return loadRuleJson.setOr(list);
               default:
                 throw new IllegalArgumentException("List operator accepted: " + operator);
             }
           })
-          .map(loadRuleJson::setOr)
           .map(dto -> dto.setOperator(operator));
-    }
-
-    private Mono<List<LoadRuleJson>> toLoadRuleJsonList(List<LoadRule> loadRules) {
-      return Flux.fromIterable(loadRules)
-          .flatMap(loadRuleDomain2JsonMapper::map)
-          .collectList();
     }
   }
 
@@ -92,8 +79,12 @@ public class LoadRuleDomain2JsonMapper implements Mapper<LoadRule, LoadRuleJson>
 
     @Override
     public Mono<LoadRuleJson> map(LoadRule loadRule, LoadRuleJson loadRuleJson) {
-      return Mono.just((ComparisonLoadRule) loadRule)
-          .flatMap(this::toLeftRightOperatorJson)
+      return Mono.fromCallable(() -> (ComparisonLoadRule) loadRule)
+          .flatMap(comparisonLoadRule -> Mono.zip(
+              dataExtractor2DataValueJsonMapper.map(comparisonLoadRule.leftDataExtractor()),
+              dataExtractor2DataValueJsonMapper.map(comparisonLoadRule.rightDataExtractor())
+          ))
+          .map(tuple -> new LeftRightOperatorJson(tuple.getT1(), tuple.getT2()))
           .doOnNext(leftRightOperatorJson -> {
             switch (operator) {
               case EQUAL:
@@ -111,13 +102,6 @@ public class LoadRuleDomain2JsonMapper implements Mapper<LoadRule, LoadRuleJson>
           })
           .map(dto -> loadRuleJson.setOperator(operator));
     }
-
-    private Mono<LeftRightOperatorJson> toLeftRightOperatorJson(ComparisonLoadRule comparisonLoadRule) {
-      return Mono.zip(
-          dataExtractor2DataValueJsonMapper.map(comparisonLoadRule.leftDataExtractor()),
-          dataExtractor2DataValueJsonMapper.map(comparisonLoadRule.rightDataExtractor())
-      ).map(tuple -> new LeftRightOperatorJson(tuple.getT1(), tuple.getT2()));
-    }
   }
 
   private class NotLoadRuleMapper implements SubLoadRuleMapper {
@@ -129,7 +113,7 @@ public class LoadRuleDomain2JsonMapper implements Mapper<LoadRule, LoadRuleJson>
 
     @Override
     public Mono<LoadRuleJson> map(LoadRule loadRule, LoadRuleJson loadRuleJson) {
-      return Mono.just((NotLoadRule) loadRule)
+      return Mono.fromCallable(() -> (NotLoadRule) loadRule)
           .map(notLoadRule -> notLoadRule.loadRule())
           .flatMap(loadRuleDomain2JsonMapper::map)
           .map(loadRuleJson::setNot)
@@ -146,8 +130,13 @@ public class LoadRuleDomain2JsonMapper implements Mapper<LoadRule, LoadRuleJson>
 
     @Override
     public Mono<LoadRuleJson> map(LoadRule loadRule, LoadRuleJson loadRuleJson) {
-      return Mono.just((InLoadRule) loadRule)
-          // TODO: missing data extractor mapper
+      return Mono.fromCallable(() -> (InLoadRule) loadRule)
+          .flatMap(inLoadRule -> Mono.zip(
+              dataExtractor2DataValueJsonMapper.map(inLoadRule.dataExtractor()),
+              Mono.just(inLoadRule.collection())
+          ))
+          .map(tuple -> new InOperatorJson(tuple.getT1(), tuple.getT2()))
+          .map(loadRuleJson::setIn)
           .map(dto -> loadRuleJson.setOperator(BooleanOperatorJson.IN));
     }
   }

@@ -19,8 +19,8 @@ public class DataExtractor2DataValueJsonMapper implements Mapper<DataExtractor, 
       put(MultiplyDataExtractor.class, new CalcDataExtractorMapper(refThis, CalcOperatorJson.MUL));
       put(DivideDataExtractor.class, new CalcDataExtractorMapper(refThis, CalcOperatorJson.DIV));
       put(FixedValueDataExtractor.class, new FixedValueDataExtractorMapper());
-      put(DatalayerDataExtractor.class, new CalcDataExtractorMapper(refThis, CalcOperatorJson.DIV));
-      put(PlatformYearDataExtractor.class, new CalcDataExtractorMapper(refThis, CalcOperatorJson.DIV));
+      put(DatalayerDataExtractor.class, new DatalayerValueDataExtractorMapper());
+      put(PlatformYearDataExtractor.class, new PlatformYearDataExtractorMapper());
     }};
   }
 
@@ -69,7 +69,7 @@ public class DataExtractor2DataValueJsonMapper implements Mapper<DataExtractor, 
       return Mono.just((FixedValueDataExtractor) dataExtractor)
           .map(fixedValueDataExtractor -> fixedValueDataExtractor.value())
           .map(dataValueJson::setValue)
-          .map(dto -> dataValueJson.setSource(SourceJson.CALC));
+          .map(dto -> dataValueJson.setSource(SourceJson.VALUE));
     }
   }
 
@@ -88,7 +88,7 @@ public class DataExtractor2DataValueJsonMapper implements Mapper<DataExtractor, 
     public Mono<DataValueJson> map(DataExtractor dataExtractor, DataValueJson dataValueJson) {
       return Mono.just((PlatformYearDataExtractor) dataExtractor)
           .map(platformYearDataExtractor -> dataValueJson.setPlatform("year"))
-          .map(dto -> dataValueJson.setSource(SourceJson.DATALAYER));
+          .map(dto -> dataValueJson.setSource(SourceJson.PLATFORM));
     }
   }
 }
