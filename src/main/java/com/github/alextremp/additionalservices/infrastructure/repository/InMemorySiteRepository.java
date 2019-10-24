@@ -23,6 +23,7 @@ public class InMemorySiteRepository implements SiteRepository {
               Arrays.asList(
                   AdditionalServiceBuilder.appnexus()
                       .withCode("code_appn")
+                      .withId("in_memory_1")
                       .withLoadRules(
                           Arrays.asList(
                               new NotLoadRule(
@@ -41,6 +42,7 @@ public class InMemorySiteRepository implements SiteRepository {
 
   @Override
   public Mono<Site> findById(String id) {
-    return Mono.fromCallable(() -> IN_MEMORY.get(id));
+    return Mono.fromCallable(() -> IN_MEMORY.containsKey(id))
+        .flatMap(has -> has ? Mono.just(IN_MEMORY.get(id)) : Mono.empty());
   }
 }
