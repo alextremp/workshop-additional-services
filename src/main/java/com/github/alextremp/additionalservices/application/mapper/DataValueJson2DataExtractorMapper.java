@@ -15,8 +15,6 @@ import static com.github.alextremp.additionalservices.application.dto.SourceJson
 public class DataValueJson2DataExtractorMapper implements Mapper<DataValueJson, DataExtractor> {
 
   private final FluentMap<SourceJson, SourceMapper> sourceMappers;
-  private final FluentMap<String, PlatformDataExtractorFactory> platformDataExtractorFactories;
-  private final FluentMap<CalcOperatorJson, CalcDataExtractorFactory> calcDataExtractorFactories;
 
   public DataValueJson2DataExtractorMapper() {
     this.sourceMappers = new FluentMap<SourceJson, SourceMapper>()
@@ -24,15 +22,6 @@ public class DataValueJson2DataExtractorMapper implements Mapper<DataValueJson, 
         .fluentPut(VALUE, new ValueMapper())
         .fluentPut(PLATFORM, new PlatformMapper())
         .fluentPut(CALC, new CalcMapper(this));
-
-    this.platformDataExtractorFactories = new FluentMap<String, PlatformDataExtractorFactory>()
-        .fluentPut(PlatformYearDataExtractor.PLATFORM_KEY, new PlatformYearFactory());
-
-    this.calcDataExtractorFactories = new FluentMap<CalcOperatorJson, CalcDataExtractorFactory>()
-        .fluentPut(ADD, new AddCalcDataExtractorFactory())
-        .fluentPut(SUB, new SubstractCalcDataExtractorFactory())
-        .fluentPut(MUL, new MultiplyCalcDataExtractorFactory())
-        .fluentPut(DIV, new DivideCalcDataExtractorFactory());
   }
 
   @Override
@@ -70,6 +59,13 @@ public class DataValueJson2DataExtractorMapper implements Mapper<DataValueJson, 
   }
 
   private class PlatformMapper implements SourceMapper {
+    private final FluentMap<String, PlatformDataExtractorFactory> platformDataExtractorFactories;
+
+    private PlatformMapper() {
+      this.platformDataExtractorFactories = new FluentMap<String, PlatformDataExtractorFactory>()
+          .fluentPut(PlatformYearDataExtractor.PLATFORM_KEY, new PlatformYearFactory());
+    }
+
     @Override
     public Mono<DataExtractor> map(DataValueJson dataValueJson) {
       return Mono.fromCallable(() -> platformDataExtractorFactories.getNotNull(dataValueJson.getPlatform()))
@@ -79,9 +75,15 @@ public class DataValueJson2DataExtractorMapper implements Mapper<DataValueJson, 
 
   private class CalcMapper implements SourceMapper {
     private final DataValueJson2DataExtractorMapper dataValueJson2DataExtractorMapper;
+    private final FluentMap<CalcOperatorJson, CalcDataExtractorFactory> calcDataExtractorFactories;
 
     private CalcMapper(DataValueJson2DataExtractorMapper dataValueJson2DataExtractorMapper) {
       this.dataValueJson2DataExtractorMapper = dataValueJson2DataExtractorMapper;
+      this.calcDataExtractorFactories = new FluentMap<CalcOperatorJson, CalcDataExtractorFactory>()
+          .fluentPut(ADD, new AddCalcDataExtractorFactory())
+          .fluentPut(SUB, new SubstractCalcDataExtractorFactory())
+          .fluentPut(MUL, new MultiplyCalcDataExtractorFactory())
+          .fluentPut(DIV, new DivideCalcDataExtractorFactory());
     }
 
     @Override
