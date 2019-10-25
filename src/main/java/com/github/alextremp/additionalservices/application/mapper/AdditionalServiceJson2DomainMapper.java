@@ -37,8 +37,11 @@ public class AdditionalServiceJson2DomainMapper implements Mapper<AdditionalServ
             mapLoadRules(additionalServiceJson.getLoadRules())
         ))
         .map(tuple -> tuple.getT1().withLoadRules(tuple.getT2()))
-        .map(builder -> builder.withId(additionalServiceJson.getId()))
-        .map(AdditionalServiceBuilder::build);
+        .map(builder -> builder
+            .withId(additionalServiceJson.getId())
+            .withEnabled(additionalServiceJson.getEnabled())
+            .build()
+        );
   }
 
   private Mono<List<LoadRule>> mapLoadRules(List<LoadRuleJson> loadRules) {

@@ -19,6 +19,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_NULL)
 public class AdditionalServiceJson {
   private String id;
+  private Boolean enabled = Boolean.TRUE;
   private TypeJson type;
   private MarketplaceJson marketplace;
   private AppnexusJson appnexus;

@@ -10,21 +10,23 @@ import java.util.Objects;
 public abstract class AdditionalService {
 
   private final String id;
+  private final Boolean enabled;
   private final AndLoadRule loadRule;
 
-  protected AdditionalService(String id, List<LoadRule> loadRules) {
+  protected AdditionalService(String id, Boolean enabled, List<LoadRule> loadRules) {
     Objects.requireNonNull(id, "id cannot be null");
     Objects.requireNonNull(loadRules, "loadRules cannot be null");
     if (loadRules.isEmpty()) {
       throw new IllegalArgumentException("loadRules cannot be empty");
     }
     this.id = id;
+    this.enabled = enabled != null ? enabled : Boolean.TRUE;
     this.loadRule = new AndLoadRule(loadRules);
   }
 
   public boolean active(Datalayer datalayer) throws AdditionalServiceEvaluationException {
     try {
-      return loadRule.evaluate(datalayer);
+      return enabled && loadRule.evaluate(datalayer);
     } catch (Exception evaluationException) {
       throw new AdditionalServiceEvaluationException("Error evaluating: " + id, evaluationException);
     }
@@ -36,5 +38,9 @@ public abstract class AdditionalService {
 
   public AndLoadRule loadRule() {
     return loadRule;
+  }
+
+  public Boolean enabled() {
+    return enabled;
   }
 }

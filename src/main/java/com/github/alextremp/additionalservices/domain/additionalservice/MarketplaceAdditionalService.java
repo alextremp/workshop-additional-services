@@ -9,8 +9,8 @@ public class MarketplaceAdditionalService extends AppNexusAdditionalService {
 
   private final Integer marketplaceId;
 
-  protected MarketplaceAdditionalService(String id, List<LoadRule> loadRules, String code, Integer marketplaceId) {
-    super(id, loadRules, code);
+  protected MarketplaceAdditionalService(String id, Boolean active, List<LoadRule> loadRules, String code, Integer marketplaceId) {
+    super(id, active, loadRules, code);
     Objects.requireNonNull(marketplaceId, "marketplaceId cannot be null");
     this.marketplaceId = marketplaceId;
   }

@@ -26,7 +26,10 @@ public class AdditionalServiceDomain2JsonMapper implements Mapper<AdditionalServ
   public Mono<AdditionalServiceJson> map(AdditionalService additionalService) {
     return Mono.fromCallable(() -> subClassMappers.getNotNull(additionalService.getClass()))
         .flatMap(subAdditionalServiceMapper -> subAdditionalServiceMapper.map(additionalService))
-        .map(dto -> dto.setId(additionalService.id()))
+        .map(dto -> dto
+            .setId(additionalService.id())
+            .setEnabled(additionalService.enabled())
+        )
         .flatMap(dto -> Mono.zip(
             Mono.just(dto),
             loadRuleDomain2JsonMapper.map(additionalService.loadRule()))
