@@ -7,6 +7,7 @@ import java.util.List;
 public abstract class AdditionalServiceBuilder {
 
   protected String id;
+  protected Boolean enabled;
   protected List<LoadRule> loadRules;
 
   public static MarketplaceAdditionalServiceBuilder marketplace() {
@@ -21,6 +22,11 @@ public abstract class AdditionalServiceBuilder {
 
   public AdditionalServiceBuilder withId(String id) {
     this.id = id;
+    return this;
+  }
+
+  public AdditionalServiceBuilder withEnabled(Boolean enabled) {
+    this.enabled = enabled;
     return this;
   }
 
@@ -39,12 +45,9 @@ public abstract class AdditionalServiceBuilder {
 
     @Override
     public AdditionalService build() {
-      return new MarketplaceAdditionalService(id, loadRules, code, marketplaceId);
+      return new MarketplaceAdditionalService(id, enabled, loadRules, code, marketplaceId);
     }
 
-    public AppnexusAdditionalServiceBuilder and() {
-      return this;
-    }
   }
 
   public static class AppnexusAdditionalServiceBuilder extends AdditionalServiceBuilder {
@@ -57,7 +60,7 @@ public abstract class AdditionalServiceBuilder {
 
     @Override
     public AdditionalService build() {
-      return new AppNexusAdditionalService(id, loadRules, code);
+      return new AppNexusAdditionalService(id, enabled, loadRules, code);
     }
   }
 

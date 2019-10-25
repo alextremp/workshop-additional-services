@@ -62,6 +62,7 @@
     },
     {
       "id": "axa",
+      "enabled": false,
       "type": "appnexus",
       "appnexus": {
         "code": "axa"

@@ -8,8 +8,8 @@ import java.util.Objects;
 public class AppNexusAdditionalService extends AdditionalService {
   private final String code;
 
-  protected AppNexusAdditionalService(String id, List<LoadRule> loadRules, String code) {
-    super(id, loadRules);
+  protected AppNexusAdditionalService(String id, Boolean enabled, List<LoadRule> loadRules, String code) {
+    super(id, enabled, loadRules);
     Objects.requireNonNull(code, "code cannot be null");
     this.code = code;
   }
